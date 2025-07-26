@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -69,8 +69,10 @@ export const verification = pgTable("verification", {
 });
 
 export const notebooks = pgTable("notebooks", {
-  id: text("id").primaryKey(),
-  name: text("title").notNull(),
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
@@ -82,7 +84,7 @@ export const notebooks = pgTable("notebooks", {
   ),
 });
 
-export const notebookRelation = relations(notebooks, ({ many, one }) => ({
+export const notebookRelations = relations(notebooks, ({ many, one }) => ({
   notes: many(notes),
   user: one(user, {
     fields: [notebooks.userId],
@@ -90,11 +92,15 @@ export const notebookRelation = relations(notebooks, ({ many, one }) => ({
   }),
 }));
 
-export type Notebook = typeof notebooks.$inferInsert;
+export type Notebook = typeof notebooks.$inferSelect & {
+  notes: Note[];
+};
 export type InsertNotebook = typeof notebooks.$inferInsert;
 
 export const notes = pgTable("notes", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   content: jsonb("content").notNull(),
   notebookId: text("notebook_id")
@@ -108,13 +114,23 @@ export const notes = pgTable("notes", {
   ),
 });
 
-export const noteRelation = relations(notes, ({ many, one }) => ({
+export const noteRelations = relations(notes, ({ one }) => ({
   notebook: one(notebooks, {
     fields: [notes.notebookId],
     references: [notebooks.id],
   }),
 }));
 
-export type Note = typeof notes.$inferInsert;
+export type Note = typeof notes.$inferSelect;
+export type InsertNote = typeof notes.$inferInsert;
 
-export const schema = { user, session, account, verification };
+export const schema = {
+  user,
+  session,
+  account,
+  verification,
+  notebooks,
+  notes,
+  notebookRelations,
+  noteRelations,
+};
