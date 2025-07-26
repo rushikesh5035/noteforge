@@ -1,9 +1,11 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
   timestamp,
   boolean,
   integer,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -65,5 +67,54 @@ export const verification = pgTable("verification", {
     () => /* @__PURE__ */ new Date()
   ),
 });
+
+export const notebooks = pgTable("notebooks", {
+  id: text("id").primaryKey(),
+  name: text("title").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+});
+
+export const notebookRelation = relations(notebooks, ({ many, one }) => ({
+  notes: many(notes),
+  user: one(user, {
+    fields: [notebooks.userId],
+    references: [user.id],
+  }),
+}));
+
+export type Notebook = typeof notebooks.$inferInsert;
+export type InsertNotebook = typeof notebooks.$inferInsert;
+
+export const notes = pgTable("notes", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  content: jsonb("content").notNull(),
+  notebookId: text("notebook_id")
+    .notNull()
+    .references(() => notebooks.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+});
+
+export const noteRelation = relations(notes, ({ many, one }) => ({
+  notebook: one(notebooks, {
+    fields: [notes.notebookId],
+    references: [notebooks.id],
+  }),
+}));
+
+export type Note = typeof notes.$inferInsert;
 
 export const schema = { user, session, account, verification };
