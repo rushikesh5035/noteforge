@@ -47,7 +47,7 @@ const CreateNotebookButton = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsLoading(true); 
+      setIsLoading(true);
       const userId = (await authClient.getSession()).data?.user.id;
 
       if (!userId) {
