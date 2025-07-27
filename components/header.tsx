@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { useScroll } from "motion/react";
-import { ModeToggle } from "./mode-toggle";
 import Image from "next/image";
 import { ModeSwitcher } from "./mode-switcher";
 
