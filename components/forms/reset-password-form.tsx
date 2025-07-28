@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signInUser, signUpUser } from "@/server/users";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -59,7 +58,7 @@ export function ResetPasswordForm({
       }
 
       setIsLoading(true);
-      const { error, data } = await authClient.resetPassword({
+      const { error } = await authClient.resetPassword({
         newPassword: values.password,
         token: token ?? "",
       });

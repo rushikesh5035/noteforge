@@ -46,7 +46,7 @@ const NotebookCard = ({ notebook }: NotebookCardProps) => {
         toast.success("Notebook deleted successfully");
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.success("Failed to deleted notebook");
     } finally {
       setIsDeleting(false);

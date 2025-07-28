@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { Logo } from "@/components/logo";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
@@ -42,8 +41,8 @@ export const HeroHeader = () => {
                 <Image
                   src="/noteforge-logo.png"
                   alt="logo"
-                  width={60}
-                  height={60}
+                  width={45}
+                  height={45}
                 />
                 <span className="text-2xl font-bold">NoteForge</span>
               </Link>

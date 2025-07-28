@@ -7,15 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Loader2, Trash2 } from "lucide-react";
-
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +45,7 @@ const NoteCard = ({ note }: NoteCardProps) => {
         toast.success("Note deleted successfully");
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.success("Failed to deleted notebook");
     } finally {
       setIsDeleting(false);

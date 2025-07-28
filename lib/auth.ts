@@ -34,7 +34,7 @@ export const auth = betterAuth({
   },
 
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, request) => {
+    sendVerificationEmail: async ({ user, url }) => {
       await resend.emails.send({
         from: "NoteForge <onboarding@resend.dev>",
         to: [user.email],
