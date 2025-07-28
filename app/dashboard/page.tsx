@@ -1,4 +1,5 @@
 import CreateNotebookButton from "@/components/create-notebook-button";
+import NotebookCard from "@/components/notebook-card";
 import { PageWrapper } from "@/components/page-wrapper";
 import { getNotebooks } from "@/server/notebook";
 
@@ -7,14 +8,14 @@ const page = async () => {
 
   return (
     <PageWrapper breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }]}>
-      <h1>Dashboard</h1>
+      <h1>Notebooks</h1>
 
       <CreateNotebookButton />
 
-      <div>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {notebooks.success &&
           notebooks?.notebooks?.map((notebook) => (
-            <div key={notebook.id}>{notebook.name}</div>
+            <NotebookCard key={notebook.id} notebook={notebook} />
           ))}
       </div>
 

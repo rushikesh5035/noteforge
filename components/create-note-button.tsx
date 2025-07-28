@@ -27,12 +27,13 @@ import { createNotebook } from "@/server/notebook";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { createNote } from "@/server/notes";
 
 const formSchema = z.object({
   name: z.string().min(1).max(50),
 });
 
-const CreateNotebookButton = () => {
+const CreateNoteButton = ({ notebookId }: { notebookId: string }) => {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -48,28 +49,23 @@ const CreateNotebookButton = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const userId = (await authClient.getSession()).data?.user.id;
 
-      if (!userId) {
-        toast.error("You must be logged in to create a notebook");
-        return;
-      }
-
-      const response = await createNotebook({
-        ...values,
-        userId,
+      const response = await createNote({
+        title: values.name,
+        content: {},
+        notebookId,
       });
 
       if (response.success) {
         form.reset();
-        toast.success("Notebook created successfully");
+        toast.success("Note created successfully");
         router.refresh();
         setIsOpen(false);
       } else {
         toast.error(response.message);
       }
     } catch {
-      toast.error("Failed to create notebook");
+      toast.error("Failed to create note");
     } finally {
       setIsLoading(false);
     }
@@ -78,13 +74,13 @@ const CreateNotebookButton = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-max">Create Notebook</Button>
+        <Button className="w-max">Create Note</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Notebook</DialogTitle>
+          <DialogTitle>Create Note</DialogTitle>
           <DialogDescription>
-            Create a new notebook to store your notes.
+            Create a new note to store your notes.
           </DialogDescription>
         </DialogHeader>
 
@@ -97,7 +93,7 @@ const CreateNotebookButton = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="My Notebook" {...field} />
+                    <Input placeholder="My Note" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,4 +113,4 @@ const CreateNotebookButton = () => {
   );
 };
 
-export default CreateNotebookButton;
+export default CreateNoteButton;
