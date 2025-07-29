@@ -39,7 +39,7 @@ export const HeroHeader = () => {
                 className="flex items-center space-x-2"
               >
                 <Image
-                  src="/noteforge-logo.png"
+                  src="/noteforgeLogo.png"
                   alt="logo"
                   width={45}
                   height={45}
