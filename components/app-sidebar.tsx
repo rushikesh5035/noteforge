@@ -32,7 +32,7 @@ export async function AppSidebar({
     <Sidebar {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <Image src="/noteforge-logo.png" alt="Logo" width={32} height={32} />
+          <Image src="/noteforgeLogo.png" alt="Logo" width={32} height={32} />
           <h2 className="text-2xl font-bold">NoteForge</h2>
         </div>
         <SearchForm />

@@ -10,7 +10,7 @@ export default function FooterSection() {
           aria-label="go home"
           className="mx-auto size-fit flex items-center gap-2"
         >
-          <Image src="/noteforge-logo.png" alt="logo" width={45} height={45} />
+          <Image src="/noteforgeLogo.png" alt="logo" width={45} height={45} />
           <span className="text-2xl font-bold">NoteForge</span>
         </Link>
 
