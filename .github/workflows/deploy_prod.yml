@@ -28,17 +28,25 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:${{ github.sha }}
 
-      - name: Deploy on AWS EC2
+      - name: Prepare SSH key
         run: |
-          # Save the SSH key to a file
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key
           chmod 600 ssh_key
 
+      - name: Upload docker-compose file to EC2
+        run: |
+          # Ensure target directory exists and upload compose file
+          ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@${{ secrets.EC2_HOST }} "mkdir -p ~/noteforge"
+          scp -o StrictHostKeyChecking=no -i ssh_key docker-compose.prod.yml ubuntu@${{ secrets.EC2_HOST }}:~/noteforge/docker-compose.prod.yml
+
+      - name: Deploy on AWS EC2
+        run: |
           # SSH into EC2 and run commands
           ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
             APP_DIR=~/noteforge
             IMAGE_TAG=${{ github.sha }}
+            mkdir -p $APP_DIR
             cd $APP_DIR
 
           echo "Pulling new image..."
