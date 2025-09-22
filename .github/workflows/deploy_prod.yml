@@ -1,0 +1,52 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+  steps:
+    - name: Checkout the code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Docker login
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build & push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile.prod
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:${{ github.sha }}
+
+    - name: Deploy on AWS EC2
+      run: |
+        # Save the SSH key to a file
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key
+        chmod 600 ssh_key
+
+        # SSH into EC2 and run commands
+        ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@${{ secrets.EC2_HOST }} << EOF
+        IMAGE_TAG=${{ github.sha }}
+
+        echo "Pulling new image..."
+        docker pull rushikeshtele/noteforge:\$IMAGE_TAG
+
+        echo "Stopping and removing old container..."
+        docker compose -f docker-compose.prod.yml down || true
+
+        echo "Starting new container..."
+        docker compose -f docker-compose.prod.yml up -d
+
+        echo "Cleaning up old images..."
+        docker image prune -af
+        EOF
