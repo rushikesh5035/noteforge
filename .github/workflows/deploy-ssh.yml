@@ -1,14 +1,13 @@
-name: deploy the backend
+name: Deploy Production
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/noteforge
+  deploy:
+    runs-on: ubuntu-latest 
+
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
@@ -25,39 +24,25 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.IMAGE_NAME }}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:${{ github.sha }}
 
       - name: Deploy to AWS VM via SSH
         shell: bash
         run: |
-          set -euo pipefail
           echo "${{ secrets.EC2_SSH_KEY }}" > ssh_key
           chmod 600 ssh_key
 
-          # Run remote commands on EC2
-          ssh -o StrictHostKeyChecking=no -i ssh_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            set -euo pipefail
-
+          ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             echo "Disk usage before cleanup:" && df -h || true
             echo "Docker disk usage before cleanup:" && docker system df || true
 
-            # Log in to Docker Hub
-            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
             # Stop and remove old container if exists
             docker ps -q --filter "name=noteforge" | grep -q . && docker stop noteforge && docker rm noteforge || true
-
-            # Cleanup unused containers/images/build cache to free space
-            docker container prune -f || true
-            docker image prune -af || true
-            docker builder prune -af || true
 
             echo "Pulling image..."
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:${{ github.sha }}
@@ -71,7 +56,4 @@ jobs:
               -e PORT=3000 \
               -e HOSTNAME=0.0.0.0 \
               ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:${{ github.sha }}
-
-            echo "Disk usage after deploy:" && df -h || true
-            echo "Docker disk usage after deploy:" && docker system df || true
           EOF
