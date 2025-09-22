@@ -16,6 +16,23 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
+# Provide safe default build-time envs so Next.js can bundle without needing real secrets.
+# These only affect build-time and do not override runtime envs in the final image.
+ARG NEXT_PUBLIC_BASE_URL=http://localhost:3000
+ARG BETTER_AUTH_SECRET=dummy_secret
+ARG BETTER_AUTH_URL=http://localhost:3000/api/auth
+ARG DATABASE_URL=postgres://user:pass@localhost:5432/db
+ARG RESEND_API_KEY=dummy_resend_key
+ARG GOOGLE_CLIENT_ID=dummy_google_id
+ARG GOOGLE_CLIENT_SECRET=dummy_google_secret
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL \
+    BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET \
+    BETTER_AUTH_URL=$BETTER_AUTH_URL \
+    DATABASE_URL=$DATABASE_URL \
+    RESEND_API_KEY=$RESEND_API_KEY \
+    GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
+    GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+
 RUN pnpm build
 
 # Stage 3: runner
