@@ -2,9 +2,8 @@ version: "3.9"
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    # Image will be updated by CI to include the specific tag (git SHA)
+    image: your-dockerhub-username/noteforge:latest
     container_name: noteforge-prod
     ports:
       - "3000:3000"

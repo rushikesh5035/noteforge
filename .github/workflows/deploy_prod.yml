@@ -27,8 +27,6 @@ jobs:
           file: ./Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:${{ github.sha }}
-          build-args: |
-            NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
 
       - name: Deploy on AWS EC2
         run: |
@@ -44,7 +42,7 @@ jobs:
             cd $APP_DIR
 
           echo "Pulling new image..."
-          docker pull rushikeshtele/noteforge:\$IMAGE_TAG
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:$IMAGE_TAG
 
           echo "Updating docker-compose.prod.yml with new image tag..."
           sed -i "0,/image:/s|image:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/noteforge:$IMAGE_TAG|" docker-compose.prod.yml
